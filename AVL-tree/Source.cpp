@@ -10,7 +10,8 @@ struct Node {
 	Node* left;
 };
 
-void add(string newIntegerPart, string newDecimalPart, Node* root) {
+
+void add(string newIntegerPart, string newDecimalPart, Node*& root) {
 	if (root != NULL) {
 		if (newIntegerPart > root->integerPart || (newIntegerPart == root->integerPart && newDecimalPart > root->decimalPart)) {
 			if (root->right != NULL)
@@ -35,6 +36,13 @@ void add(string newIntegerPart, string newDecimalPart, Node* root) {
 			}
 		}
 	}
+	else {
+		root = new Node;
+		root->integerPart = newIntegerPart;
+		root->decimalPart = newDecimalPart;
+		root->right = NULL;
+		root->left = NULL;
+	}
 }
 
 void printTree(Node* node, int indent = 0) {
@@ -49,11 +57,7 @@ void printTree(Node* node, int indent = 0) {
 
 
 int main() {
-	Node* root = new Node;
-	root->left = NULL;
-	root->right = NULL;
-	root->decimalPart = "6";
-	root->integerPart = "1";
+	Node* root = NULL;
 	add("1", "8", root);
 	add("1", "4", root);
 	add("1", "9", root);
