@@ -45,6 +45,18 @@ void add(string newIntegerPart, string newDecimalPart, Node*& root) {
 	}
 }
 
+bool search(string integerPart, string decimalPart, Node* root) {
+	while (root != NULL) {
+		if (root->integerPart == integerPart && root->decimalPart == decimalPart)
+			return true;
+		if (integerPart > root->integerPart || (integerPart == root->integerPart && decimalPart > root->decimalPart))
+			root = root->right;
+		else
+			root = root->left;
+	}
+	return false;
+}
+
 void printTree(Node* node, int indent = 0) {
 	if (node != NULL) {
 		cout << setw(indent) << (node->integerPart) << '.' << (node->decimalPart) << endl;
@@ -65,6 +77,10 @@ int main() {
 	add("1", "6", root);
 	add("1", "0", root);
 
+	if (search("2", "5", root))
+		cout << "TAK" << endl;
+	else
+		cout << "NIE" << endl;
 	printTree(root);
 	getchar();
 }
