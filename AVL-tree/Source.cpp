@@ -11,6 +11,56 @@ struct Node {
 };
 
 
+
+Node* FindMin(Node* root)
+{
+    Node* temp = root;
+    while (temp->left != NULL)
+        temp = temp->left;
+    return temp;
+}
+
+
+Node* Delete(Node *root, string integerPart, string decimalPart) {
+  if (root == NULL) {
+     return NULL;
+  }
+  if (integerPart < root->integerPart || (integerPart == root->integerPart && decimalPart < root->decimalPart)) { 
+      root->left = Delete(root->left, integerPart,decimalPart);
+  } else if (integerPart > root->integerPart || (integerPart == root->integerPart && decimalPart > root->decimalPart)) { 
+      root->right = Delete(root->right,integerPart,decimalPart);
+  } else {
+    
+     if (root->left == NULL && root->right == NULL) {
+        delete(root); 
+        root = NULL;
+     }
+    
+     else if (root->left == NULL) {
+        struct Node *temp = root; 
+        root = root->right;
+        delete temp;
+     }
+     
+     else if (root->right == NULL) {
+        struct Node *temp = root; 
+        root = root->left;
+        delete temp;
+     }
+     
+     else {
+        struct Node *temp = FindMin(root->right); 
+        root->decimalPart = temp->decimalPart; 
+        
+		root->integerPart = temp->integerPart;
+		root->right = Delete(root->right, temp->integerPart,temp->decimalPart); 
+     }
+  }
+  return root; 
+}
+
+
+
 void add(string newIntegerPart, string newDecimalPart, Node*& root) {
 	if (root != NULL) {
 		if (newIntegerPart > root->integerPart || (newIntegerPart == root->integerPart && newDecimalPart > root->decimalPart)) {
