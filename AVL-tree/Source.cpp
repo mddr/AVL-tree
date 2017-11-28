@@ -10,10 +10,19 @@ struct Node {
 	Node* left;
 };
 
+int CompareIntegerParts(string a, string b) {
+	if (a.length() > b.length())
+		return 1;
+	if (a.length() < b.length())
+		return -1;
+	return a.compare(b);
+}
 
+int CompareDecimalParts(string a, string b) {	
+	return a.compare(b);
+}
 
-Node* FindMin(Node* root)
-{
+Node* FindMin(Node* root) {
     Node* temp = root;
     while (temp->left != NULL)
         temp = temp->left;
@@ -25,33 +34,34 @@ Node* Delete(Node *root, string integerPart, string decimalPart) {
   if (root == NULL) {
      return NULL;
   }
-  if (integerPart < root->integerPart || (integerPart == root->integerPart && decimalPart < root->decimalPart)) { 
+  if (CompareIntegerParts(integerPart, root->integerPart) < 0 || (CompareDecimalParts(integerPart,root->integerPart) == 0 
+  		&& CompareDecimalParts(decimalPart, root->decimalPart) < 0)) { 
       root->left = Delete(root->left, integerPart,decimalPart);
-  } else if (integerPart > root->integerPart || (integerPart == root->integerPart && decimalPart > root->decimalPart)) { 
+  } else if (CompareIntegerParts(integerPart, root->integerPart) > 0 || (CompareDecimalParts(integerPart,root->integerPart) == 0 
+  		&& CompareDecimalParts(decimalPart, root->decimalPart) > 0)) { 
       root->right = Delete(root->right,integerPart,decimalPart);
   } else {
     
      if (root->left == NULL && root->right == NULL) {
-        delete(root); 
+        delete root; 
         root = NULL;
      }
     
      else if (root->left == NULL) {
-        struct Node *temp = root; 
+        Node *temp = root; 
         root = root->right;
         delete temp;
      }
      
      else if (root->right == NULL) {
-        struct Node *temp = root; 
+        Node *temp = root; 
         root = root->left;
         delete temp;
      }
      
      else {
         struct Node *temp = FindMin(root->right); 
-        root->decimalPart = temp->decimalPart; 
-        
+        root->decimalPart = temp->decimalPart;     
 		root->integerPart = temp->integerPart;
 		root->right = Delete(root->right, temp->integerPart,temp->decimalPart); 
      }
@@ -61,11 +71,12 @@ Node* Delete(Node *root, string integerPart, string decimalPart) {
 
 
 
-void add(string newIntegerPart, string newDecimalPart, Node*& root) {
+void Add(string newIntegerPart, string newDecimalPart, Node*& root) {
 	if (root != NULL) {
-		if (newIntegerPart > root->integerPart || (newIntegerPart == root->integerPart && newDecimalPart > root->decimalPart)) {
+		if (CompareIntegerParts(newIntegerPart, root->integerPart) > 0 || (CompareDecimalParts(newIntegerPart,root->integerPart) == 0 
+  				&& CompareDecimalParts(newDecimalPart, root->decimalPart) > 0)) {
 			if (root->right != NULL)
-				add(newIntegerPart, newDecimalPart, root->right);
+				Add(newIntegerPart, newDecimalPart, root->right);
 			else {
 				root->right = new Node;
 				root->right->integerPart = newIntegerPart;
@@ -76,7 +87,7 @@ void add(string newIntegerPart, string newDecimalPart, Node*& root) {
 		}
 		else {
 			if (root->left != NULL)
-				add(newIntegerPart, newDecimalPart, root->left);
+				Add(newIntegerPart, newDecimalPart, root->left);
 			else {
 				root->left = new Node;
 				root->left->integerPart = newIntegerPart;
@@ -95,11 +106,12 @@ void add(string newIntegerPart, string newDecimalPart, Node*& root) {
 	}
 }
 
-bool search(string integerPart, string decimalPart, Node* root) {
+bool Search(string integerPart, string decimalPart, Node* root) {
 	while (root != NULL) {
-		if (root->integerPart == integerPart && root->decimalPart == decimalPart)
+		if (CompareIntegerParts(integerPart, root->integerPart) == 0 && CompareDecimalParts(decimalPart, root->decimalPart) == 0)
 			return true;
-		if (integerPart > root->integerPart || (integerPart == root->integerPart && decimalPart > root->decimalPart))
+		if (CompareIntegerParts(integerPart, root->integerPart) > 0 || (CompareDecimalParts(integerPart,root->integerPart) == 0 
+  				&& CompareDecimalParts(decimalPart, root->decimalPart) > 0))
 			root = root->right;
 		else
 			root = root->left;
@@ -107,30 +119,34 @@ bool search(string integerPart, string decimalPart, Node* root) {
 	return false;
 }
 
-void printTree(Node* node, int indent = 0) {
+void PrintTree(Node* node, int indent = 0, char leaf = 'k') {
 	if (node != NULL) {
-		cout << setw(indent) << (node->integerPart) << '.' << (node->decimalPart) << endl;
+		cout << setw(indent) << leaf<<": "<< (node->integerPart) << '.' << (node->decimalPart) << endl;
 		if (node->left != NULL)
-			printTree(node->left, indent + 4);
+			PrintTree(node->left, indent + 4, 'l');
 		if (node->right != NULL)
-			printTree(node->right, indent + 4);
+			PrintTree(node->right, indent + 4, 'p');
 	}
 }
 
 
 int main() {
 	Node* root = NULL;
-	add("1", "8", root);
-	add("1", "4", root);
-	add("1", "9", root);
-	add("1", "7", root);
-	add("1", "6", root);
-	add("1", "0", root);
+	Add("1", "8", root);
+	Add("1", "4", root);
+	Add("1", "9", root);
+	Add("1","85",root);
+	Add("1","851",root);	
+	Add("1", "7", root);
+	Add("1", "6", root);
+	Add("1", "0", root);
 
-	if (search("2", "5", root))
-		cout << "TAK" << endl;
-	else
-		cout << "NIE" << endl;
-	printTree(root);
-	getchar();
+	// if (Search("2", "5", root))
+	// 	cout << "TAK" << endl;
+	// else
+	// 	cout << "NIE" << endl;
+	PrintTree(root);
+	// cout<<"po usunieciu"<<endl;
+	// Delete(root,"1","9");
+	// PrintTree(root);
 }
