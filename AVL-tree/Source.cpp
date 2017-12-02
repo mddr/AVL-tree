@@ -119,7 +119,7 @@ bool Search(string integerPart, string decimalPart, Node* root) {
 int CountIntegers(string integerPart, Node* root) {
 	int counter = 0;
 	if (root != NULL) {
-		if (integerPart == root->integerPart) {
+		if (CompareIntegerParts(integerPart, root->integerPart) == 0) {
 			counter++;
 			if (root->right != NULL)
 				counter += CountIntegers(integerPart, root->right);
@@ -127,12 +127,12 @@ int CountIntegers(string integerPart, Node* root) {
 				counter += CountIntegers(integerPart, root->left);
 		}
 		else {
-			if (integerPart > root->integerPart) {
+			if (CompareIntegerParts(integerPart, root->integerPart) > 0) {
 				if (root->right != NULL)
 					counter += CountIntegers(integerPart, root->right);
 			}
 			else
-				if (integerPart < root->integerPart) {
+				if (CompareIntegerParts(integerPart, root->integerPart) < 0) {
 					if (root->left != NULL)
 						counter += CountIntegers(integerPart, root->left);
 				}
