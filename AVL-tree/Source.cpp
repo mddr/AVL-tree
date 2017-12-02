@@ -29,7 +29,6 @@ Node* FindMin(Node* root) {
     return temp;
 }
 
-
 Node* Delete(Node *root, string integerPart, string decimalPart) {
   if (root == NULL) {
      return NULL;
@@ -48,15 +47,15 @@ Node* Delete(Node *root, string integerPart, string decimalPart) {
      }
     
      else if (root->left == NULL) {
-        Node *temp = root; 
+       // Node *temp = root; 
         root = root->right;
-        delete temp;
+       // delete temp;
      }
      
      else if (root->right == NULL) {
-        Node *temp = root; 
+      //  Node *temp = root; 
         root = root->left;
-        delete temp;
+      //  delete temp;
      }
      
      else {
@@ -68,8 +67,6 @@ Node* Delete(Node *root, string integerPart, string decimalPart) {
   }
   return root; 
 }
-
-
 
 void Add(string newIntegerPart, string newDecimalPart, Node*& root) {
 	if (root != NULL) {
@@ -119,9 +116,9 @@ bool Search(string integerPart, string decimalPart, Node* root) {
 	return false;
 }
 
-void PrintTree(Node* node, int indent = 0, char leaf = 'k') {
+void PrintTree(Node* node, int indent = 0, char c = 'k') {
 	if (node != NULL) {
-		cout << setw(indent) << leaf<<": "<< (node->integerPart) << '.' << (node->decimalPart) << endl;
+		cout << setw(indent) << c<<": "<< (node->integerPart) << '.' << (node->decimalPart) << endl;
 		if (node->left != NULL)
 			PrintTree(node->left, indent + 4, 'l');
 		if (node->right != NULL)
@@ -146,7 +143,8 @@ int main() {
 	// else
 	// 	cout << "NIE" << endl;
 	PrintTree(root);
-	// cout<<"po usunieciu"<<endl;
-	// Delete(root,"1","9");
-	// PrintTree(root);
+	cout<<"po usunieciu"<<endl;
+	Delete(root,"1","9");
+	PrintTree(root);
+	getchar();
 }
