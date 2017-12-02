@@ -116,6 +116,31 @@ bool Search(string integerPart, string decimalPart, Node* root) {
 	return false;
 }
 
+int CountIntegers(string integerPart, Node* root) {
+	int counter = 0;
+	if (root != NULL) {
+		if (integerPart == root->integerPart) {
+			counter++;
+			if (root->right != NULL)
+				counter += CountIntegers(integerPart, root->right);
+			if (root->left != NULL)
+				counter += CountIntegers(integerPart, root->left);
+		}
+		else {
+			if (integerPart > root->integerPart) {
+				if (root->right != NULL)
+					counter += CountIntegers(integerPart, root->right);
+			}
+			else
+				if (integerPart < root->integerPart) {
+					if (root->left != NULL)
+						counter += CountIntegers(integerPart, root->left);
+				}
+		}
+	}
+	return counter;
+}
+
 void PrintTree(Node* node, int indent = 0, char c = 'k') {
 	if (node != NULL) {
 		cout << setw(indent) << c<<": "<< (node->integerPart) << '.' << (node->decimalPart) << endl;
