@@ -36,12 +36,15 @@ int CompareDecimalParts(string a, string b)
 Node* RotationRR(Node* a)
 {
     Node* b = a->left;
+    Node* tmp = b->left;
 
-    a->left = b->right;
+    a->left = tmp;
     b->right = a;
 
-    b->weight = 0;
-    a->weight = 0;
+    b->weight = 1 + max(weight(b->left),
+                        weight(b->right));
+    a->weight = 1 + max(weight(a->left),
+                        weight(a->right));
 
     return b;
 }
@@ -51,11 +54,13 @@ Node* RotationLL(Node* a)
     Node* b = a->right;
     Node* tmp = b->left;
 
-    a->right = b->left;
+    a->right = tmp;
     b->left = a;
 
-    b->weight = 0;
-    a->weight = 0;
+    b->weight = 1 + max(weight(b->left),
+                        weight(b->right));
+    a->weight = 1 + max(weight(a->left),
+                        weight(a->right));
 
     return b;
 }
@@ -193,7 +198,9 @@ Node* NewNode(string newIntegerPart, string newDecimalPart)
 
 Node* Add(string newIntegerPart, string newDecimalPart, Node* root)
 {
-    if (root != NULL) {
+    if (root == NULL)
+        return NewNode(newIntegerPart, newDecimalPart);
+    else {
         if (CompareIntegerParts(newIntegerPart, root->integerPart) > 0 || (CompareDecimalParts(newIntegerPart, root->integerPart) == 0
                                                                               && CompareDecimalParts(newDecimalPart, root->decimalPart) > 0)) {
             root->right = Add(newIntegerPart, newDecimalPart, root->right);
@@ -201,11 +208,34 @@ Node* Add(string newIntegerPart, string newDecimalPart, Node* root)
         else
             root->left = Add(newIntegerPart, newDecimalPart, root->left);
     }
-    else
-        return NewNode(newIntegerPart, newDecimalPart);
 
     root->weight = 1 + max(weight(root->left),
                            weight(root->right));
+
+    int balance = getBalance(root);
+
+    if (balance > 1 && (CompareIntegerParts(newIntegerPart, root->left->integerPart) < 0 || (CompareDecimalParts(newIntegerPart, root->left->integerPart) == 0
+                                                                                                && CompareDecimalParts(newDecimalPart, root->left->decimalPart) < 0)))
+        return RotationRR(root);
+
+    // Right Right Case
+    if (balance < -1 && (CompareIntegerParts(newIntegerPart, root->right->integerPart) > 0 || (CompareDecimalParts(newIntegerPart, root->right->integerPart) == 0
+                                                                                                  && CompareDecimalParts(newDecimalPart, root->right->decimalPart) > 0)))
+        return RotationLL(root);
+
+    // Left Right Case
+    if (balance > 1 && (CompareIntegerParts(newIntegerPart, root->left->integerPart) > 0 || (CompareDecimalParts(newIntegerPart, root->left->integerPart) == 0
+                                                                                                && CompareDecimalParts(newDecimalPart, root->left->decimalPart) > 0))) {
+        root->left = RotationLL(root->left);
+        return RotationRR(root);
+    }
+
+    // Right Left Case
+    if (balance < -1 && (CompareIntegerParts(newIntegerPart, root->right->integerPart) < 0 || (CompareDecimalParts(newIntegerPart, root->right->integerPart) == 0
+                                                                                                  && CompareDecimalParts(newDecimalPart, root->right->decimalPart) < 0))) {
+        root->right = RotationRR(root->right);
+        return RotationLL(root);
+    }
 
     return root;
 }
@@ -283,6 +313,7 @@ Add("1", "7", root);
     root = Add("25", "0", root);
     root = Add("40", "0", root);
     root = Add("27", "0", root);
+
     PrintTree(root);
 
     //	root = RotationLL(root);
