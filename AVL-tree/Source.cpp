@@ -6,6 +6,7 @@ using namespace std;
 struct Node {
 	string integerPart;
 	string decimalPart;
+	int weight;
 	Node* right;
 	Node* left;
 };
@@ -21,6 +22,88 @@ int CompareIntegerParts(string a, string b) {
 int CompareDecimalParts(string a, string b) {	
 	return a.compare(b);
 }
+
+Node* RotationRR(Node* a) {
+	Node *b = a->left;
+
+	a->left = b->right;
+	b->right = a;
+
+	b->weight = 0;
+	a->weight = 0;
+
+	return b;
+}
+
+Node* RotationLL(Node* a) {
+	Node *b = a->right;
+	Node *tmp = b->left;
+
+	a->right = b->left;
+	b->left = a;
+
+	b->weight = 0;
+	a->weight = 0;
+
+	return b;
+}
+
+Node* RotationLR(Node *a) {
+	Node *b = a->left;
+	Node *c = b->right;
+
+	b->right = c->left;
+	a->left = c->right;
+	c->left = b;
+	c->right = a;
+
+	switch (c->weight) {
+	case -1:
+		b->weight = 1;
+		a->weight = 0;
+		break;
+	case 0:
+		b->weight = 0;
+		a->weight = 0;
+		break;
+	case 1:
+		b->weight = 0;
+		a->weight = -1;
+		break;
+	}
+	c->weight = 0;
+
+	return c;
+}
+
+Node* RotationRL(Node *a) {
+	Node *b = a->right;
+	Node *c = b->left;
+
+	b->left = c->right;
+	a->right = c->left;
+	c->left = a;
+	c->right = b;
+
+	switch (c->weight) {
+	case -1:
+		b->weight = 0;
+		a->weight = 1;
+		break;
+	case 0:
+		b->weight = 0;
+		a->weight = 0;
+		break;
+	case 1:
+		b->weight = -1;
+		a->weight = 0;
+		break;
+	}
+	c->weight = 0;
+
+	return c;
+}
+
 
 Node* FindMin(Node* root) {
     Node* temp = root;
@@ -67,6 +150,7 @@ Node* Delete(Node *root, string integerPart, string decimalPart) {
   }
   return root; 
 }
+
 
 void Add(string newIntegerPart, string newDecimalPart, Node*& root) {
 	if (root != NULL) {
@@ -154,22 +238,32 @@ void PrintTree(Node* node, int indent = 0, char c = 'k') {
 
 int main() {
 	Node* root = NULL;
-	Add("1", "8", root);
+	/*Add("1", "8", root);
 	Add("1", "4", root);
 	Add("1", "9", root);
 	Add("1","85",root);
 	Add("1","851",root);	
 	Add("1", "7", root);
 	Add("1", "6", root);
-	Add("1", "0", root);
+	Add("1", "0", root);*/
 
 	// if (Search("2", "5", root))
 	// 	cout << "TAK" << endl;
 	// else
 	// 	cout << "NIE" << endl;
+
+	Add("20", "0", root);
+	Add("10", "0", root);
+	Add("30", "0", root);
+	Add("25", "0", root);
+	Add("40", "0", root);
+	Add("27", "0", root);
 	PrintTree(root);
-	cout<<"po usunieciu"<<endl;
+
+	root = RotationRL(root);
+	PrintTree(root);
+	/*cout<<"po usunieciu"<<endl;
 	Delete(root,"1","9");
-	PrintTree(root);
+	PrintTree(root);*/
 	getchar();
 }
