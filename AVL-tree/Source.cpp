@@ -6,6 +6,7 @@ using namespace std;
 struct Node {
 	string integerPart;
 	string decimalPart;
+	int height;
 	int weight;
 	Node* right;
 	Node* left;
@@ -23,14 +24,24 @@ int CompareDecimalParts(string a, string b) {
 	return a.compare(b);
 }
 
+int MaxOfTwo(int a, int b) {
+	return a > b ? a : b;
+}
+
+int GetHeight(Node *node) {
+	if (node == NULL)
+		return 0;
+	return node->height;
+}
+
 Node* RotationRR(Node* a) {
 	Node *b = a->left;
 
 	a->left = b->right;
 	b->right = a;
 
-	b->weight = 0;
-	a->weight = 0;
+	b->weight = MaxOfTwo(GetHeight(b->left), GetHeight(b->right));
+	a->weight = MaxOfTwo(GetHeight(a->left), GetHeight(a->right));
 
 	return b;
 }
@@ -42,8 +53,8 @@ Node* RotationLL(Node* a) {
 	a->right = b->left;
 	b->left = a;
 
-	b->weight = 0;
-	a->weight = 0;
+	b->weight = MaxOfTwo(GetHeight(b->left), GetHeight(b->right));
+	a->weight = MaxOfTwo(GetHeight(a->left), GetHeight(a->right));
 
 	return b;
 }
@@ -151,40 +162,48 @@ Node* Delete(Node *root, string integerPart, string decimalPart) {
   return root; 
 }
 
+int CompareNumbers(string int1, string dec1, string int2, string dec2) {
+	if (CompareIntegerParts(int1, int2) > 0 || (CompareIntegerParts(int1, int2) == 0 && CompareDecimalParts(dec1, dec2) > 0))
+		return 1;
+	else
+		return -1;
+}
 
-void Add(string newIntegerPart, string newDecimalPart, Node*& root) {
-	if (root != NULL) {
-		if (CompareIntegerParts(newIntegerPart, root->integerPart) > 0 || (CompareDecimalParts(newIntegerPart,root->integerPart) == 0 
-  				&& CompareDecimalParts(newDecimalPart, root->decimalPart) > 0)) {
-			if (root->right != NULL)
-				Add(newIntegerPart, newDecimalPart, root->right);
-			else {
-				root->right = new Node;
-				root->right->integerPart = newIntegerPart;
-				root->right->decimalPart = newDecimalPart;
-				root->right->right = NULL;
-				root->right->left = NULL;
-			}
-		}
-		else {
-			if (root->left != NULL)
-				Add(newIntegerPart, newDecimalPart, root->left);
-			else {
-				root->left = new Node;
-				root->left->integerPart = newIntegerPart;
-				root->left->decimalPart = newDecimalPart;
-				root->left->right = NULL;
-				root->left->left = NULL;
-			}
-		}
+Node* Add(string newIntegerPart, string newDecimalPart, Node* root) {
+	if (root == NULL) {
+		Node *tmp = new Node;
+		tmp->integerPart = newIntegerPart;
+		tmp->decimalPart = newDecimalPart;
+		tmp->right = NULL;
+		tmp->left = NULL;
+		tmp->weight = 0;
+		tmp->height = 1;
+		return tmp;
+	}
+	if (CompareNumbers(newIntegerPart, newDecimalPart, root->integerPart, root->decimalPart) == 1) {
+		root->right = Add(newIntegerPart, newDecimalPart, root->right);
 	}
 	else {
-		root = new Node;
-		root->integerPart = newIntegerPart;
-		root->decimalPart = newDecimalPart;
-		root->right = NULL;
-		root->left = NULL;
+		root->left = Add(newIntegerPart, newDecimalPart, root->left);
 	}
+
+	root->height = 1 + MaxOfTwo(GetHeight(root->left), GetHeight(root->right));
+	root->weight = GetHeight(root->left) - GetHeight(root->right);
+
+	if (root->weight > 1 && CompareNumbers(newIntegerPart, newDecimalPart, root->left->integerPart, root->left->decimalPart) == -1) {
+		return RotationRR(root);
+	}
+	if (root->weight < -1 && CompareNumbers(newIntegerPart, newDecimalPart, root->left->integerPart, root->left->decimalPart) == 1) {
+		return RotationLL(root);
+	}
+	if (root->weight > 1 && CompareNumbers(newIntegerPart, newDecimalPart, root->left->integerPart, root->left->decimalPart) == 1) {
+		return RotationLR(root);
+	}
+	if (root->weight < -1 && CompareNumbers(newIntegerPart, newDecimalPart, root->left->integerPart, root->left->decimalPart) == -1) {
+		return RotationRL(root);
+	}
+
+	return root;
 }
 
 bool Search(string integerPart, string decimalPart, Node* root) {
@@ -227,7 +246,7 @@ int CountIntegers(string integerPart, Node* root) {
 
 void PrintTree(Node* node, int indent = 0, char c = 'k') {
 	if (node != NULL) {
-		cout << setw(indent) << c<<": "<< (node->integerPart) << '.' << (node->decimalPart) << endl;
+		cout << setw(indent) << c<<": "<< (node->integerPart) << '.' << (node->decimalPart)<<" ["<<(node->weight)<<"]" << endl;
 		if (node->left != NULL)
 			PrintTree(node->left, indent + 4, 'l');
 		if (node->right != NULL)
@@ -238,29 +257,27 @@ void PrintTree(Node* node, int indent = 0, char c = 'k') {
 
 int main() {
 	Node* root = NULL;
-	/*Add("1", "8", root);
-	Add("1", "4", root);
-	Add("1", "9", root);
-	Add("1","85",root);
-	Add("1","851",root);	
-	Add("1", "7", root);
-	Add("1", "6", root);
-	Add("1", "0", root);*/
+	root = Add("1", "8", root);
+	root = Add("1", "4", root);
+	root = Add("1", "9", root);
+	root = Add("1","85",root);
+	root = Add("1","851",root);	
+	root = Add("1", "7", root);
+	root = Add("1", "6", root);
+	root = Add("1", "0", root);
 
 	// if (Search("2", "5", root))
 	// 	cout << "TAK" << endl;
 	// else
 	// 	cout << "NIE" << endl;
 
-	Add("20", "0", root);
-	Add("10", "0", root);
-	Add("30", "0", root);
-	Add("25", "0", root);
-	Add("40", "0", root);
-	Add("27", "0", root);
-	PrintTree(root);
+	//root = Add("20", "0", root);
+	//root = Add("10", "0", root);
+	//root = Add("30", "0", root);
+	//root = Add("5", "0", root);
+	//root = Add("15", "0", root);
+	//root = Add("16", "0", root);
 
-	root = RotationRL(root);
 	PrintTree(root);
 	/*cout<<"po usunieciu"<<endl;
 	Delete(root,"1","9");
