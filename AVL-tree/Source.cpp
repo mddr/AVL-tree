@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <string>
 #include <fstream>
+#include <ctime>
 using namespace std;
 
 struct Node {
@@ -9,7 +10,6 @@ struct Node {
 	string decimal;
 	Node *left;
 	Node *right;
-
 	int height;
 	int weight;
 };
@@ -59,6 +59,8 @@ Node *RotateLeft(Node*& a) {
 Node* RotateLeftRight(Node*& a) {
 	Node *b = a->left;
 	Node *c = b->right;
+	if (c==NULL)
+		return c;
 	b->right = c->left;
 	a->left = c->right;
 	c->left = b;
@@ -84,6 +86,8 @@ Node* RotateLeftRight(Node*& a) {
 Node* RotateRightLeft(Node*& a) {
 	Node *b = a->right;
 	Node *c = b->left;
+	if (c==NULL)
+		return c;
 	b->left = c->right;
 	a->right = c->left;
 	c->left = a;
@@ -139,7 +143,6 @@ Node* NewNode(string i, string d) {
 	node->decimal = d;
 	node->left = NULL;
 	node->right = NULL;
-
 	node->height = 1;
 	node->weight = 0;
 	return(node);
@@ -150,11 +153,9 @@ Node* Add(Node* node, string i, string d) {
 		return NewNode(i, d);
 	if (CompareNumbers(i, d, node->integer, node->decimal) > 0) {
 		node->right = Add(node->right, i, d);
-		node->height = 1 + node->right->height;
 	}
 	else if (CompareNumbers(i, d, node->integer, node->decimal) < 0) {
 		node->left = Add(node->left, i, d);
-		node->height = 1 + node->left->height;
 	}
 	node->weight = GetHeight(node->left) - GetHeight(node->right);
 
@@ -170,7 +171,7 @@ Node* Add(Node* node, string i, string d) {
 	if (node->weight == -2 && node->right->weight == 1) {
 		return RotateRightLeft(node);
 	}
-
+	node->height = 1 + MaxOfTwo(GetHeight(node->right), GetHeight(node->left));
 	return node;
 }
 
@@ -198,16 +199,10 @@ Node* Delete(Node* node, string i, string d) {
 			node = NULL;
 		}
 		else if (node->left == NULL) {
-			Node *tmp = node->right;
-			tmp->height--;
-			delete node->right;
-			return tmp;
+			return node->right;
 		}
 		else if (node->right == NULL) {
-			Node *tmp = node->left;
-			tmp->height--;
-			delete node->left;
-			return tmp;
+			return node->left;
 		}
 		else {
 			Node *tmp = MinValueNode(node->right);
@@ -220,6 +215,7 @@ Node* Delete(Node* node, string i, string d) {
 		return node;
 
 	node->weight = GetHeight(node->left) - GetHeight(node->right);
+	//node->height = 1 + MaxOfTwo(GetHeight(node->right), GetHeight(node->left));
 
 	if (node->weight == 2 && node->left->weight == -1) {
 		return RotateLeftRight(node);
@@ -232,14 +228,14 @@ Node* Delete(Node* node, string i, string d) {
 	}
 	if (node->weight == -2 && node->right->weight == 1) {
 		return RotateRightLeft(node);
-	}
-
+	}	
+	node->height = 1 + MaxOfTwo(GetHeight(node->right), GetHeight(node->left));
 	return node;
 }
 
 void PrintTree(Node* node, int indent = 0, char c = 'k') {
 	if (node != NULL) {
-		cout << setw(indent) << c << ": " << (node->integer) << '.' << (node->decimal)<< endl;
+		cout << setw(indent) << c << ": " << (node->integer) << '.' << (node->decimal)<<" ["<<node->weight<<"]"<< endl;
 		if (node->left != NULL)
 			PrintTree(node->left, indent + 4, 'l');
 		if (node->right != NULL)
@@ -285,9 +281,8 @@ int CountIntegers(string integerPart, Node* root) {
 
 int main()
 {
-	int a;
 	Node* root = NULL;
-	int liczba;
+	long long liczba;
 	char skrypt;
 	string number, decimal, integer;
 	fstream plik("in.txt", ios::in);
@@ -295,7 +290,8 @@ int main()
 
 	if (plik.good()) {
 		plik >> liczba;	
-		for (int b = 0; b < liczba + 1; b++) {
+		for (long long b = 0; b < liczba; b++) {
+			long long a;
 			plik >> skrypt;
 			plik >> number;
 			for (a = 0; a < number.length(); a++) {
@@ -306,7 +302,6 @@ int main()
 			integer = number.substr(0, a);
 			if (a != number.length())
 				decimal = number.substr(a + 1, number.length());
-
 
 			if (skrypt == 'W')
 				root = Add(root,integer, decimal);
