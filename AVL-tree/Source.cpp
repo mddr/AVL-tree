@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <fstream>
 using namespace std;
 
 struct Node {
@@ -132,7 +133,7 @@ int CompareNumbers(string int1, string dec1, string int2, string dec2) {
 		return 0;
 }
 
-Node* NewNode(string i, string d, Node *parent) {
+Node* NewNode(string i, string d) {
 	Node* node = new Node;
 	node->integer = i;
 	node->decimal = d;
@@ -144,15 +145,15 @@ Node* NewNode(string i, string d, Node *parent) {
 	return(node);
 }
 
-Node* Add(Node* node, Node* parent, string i, string d) {
+Node* Add(Node* node, string i, string d) {
 	if (node == NULL)
-		return NewNode(i, d, parent);
+		return NewNode(i, d);
 	if (CompareNumbers(i, d, node->integer, node->decimal) > 0) {
-		node->right = Add(node->right, node, i, d);
+		node->right = Add(node->right, i, d);
 		node->height = 1 + node->right->height;
 	}
 	else if (CompareNumbers(i, d, node->integer, node->decimal) < 0) {
-		node->left = Add(node->left, node, i, d);
+		node->left = Add(node->left, i, d);
 		node->height = 1 + node->left->height;
 	}
 	node->weight = GetHeight(node->left) - GetHeight(node->right);
@@ -238,7 +239,7 @@ Node* Delete(Node* node, string i, string d) {
 
 void PrintTree(Node* node, int indent = 0, char c = 'k') {
 	if (node != NULL) {
-		cout << setw(indent) << c << ": " << (node->integer) << '.' << (node->decimal)<<" ["<<node->weight<<"]" << endl;
+		cout << setw(indent) << c << ": " << (node->integer) << '.' << (node->decimal)<< endl;
 		if (node->left != NULL)
 			PrintTree(node->left, indent + 4, 'l');
 		if (node->right != NULL)
@@ -246,22 +247,84 @@ void PrintTree(Node* node, int indent = 0, char c = 'k') {
 	}
 }
 
+bool Search(string integerPart, string decimalPart, Node* root) {
+	while (root != NULL) {
+		if (CompareNumbers(integerPart, decimalPart, root->integer, root->decimal) == 0)
+			return true;
+		if (CompareNumbers(integerPart, decimalPart, root->integer, root->decimal) > 0)
+			root = root->right;
+		else
+			root = root->left;
+	}
+	return false;
+}
+
+int CountIntegers(string integerPart, Node* root) {
+	int counter = 0;
+	if (root != NULL) {
+		if (CompareIntegerParts(integerPart, root->integer) == 0) {
+			counter++;
+			if (root->right != NULL)
+				counter += CountIntegers(integerPart, root->right);
+			if (root->left != NULL)
+				counter += CountIntegers(integerPart, root->left);
+		}
+		else {
+			if (CompareIntegerParts(integerPart, root->integer) > 0) {
+				if (root->right != NULL)
+					counter += CountIntegers(integerPart, root->right);
+			}
+			else if (CompareIntegerParts(integerPart, root->integer) < 0) {
+				if (root->left != NULL)
+					counter += CountIntegers(integerPart, root->left);
+			}
+		}
+	}
+	return counter;
+}
+
 int main()
 {
-	Node *root = NULL;
-	root = Add(root,root, "1", "4");
-	root = Add(root,root, "1", "3");
-	root = Add(root,root, "1", "5");
-	root = Add(root,root, "1", "37");
-	root = Add(root,root, "1", "45");
-	root = Add(root,root, "1", "67");
-	root = Add(root,root, "1", "6");
-	root = Add(root,root, "1", "7");
+	int a;
+	Node* root = NULL;
+	int liczba;
+	char skrypt;
+	string number, decimal, integer;
+	fstream plik("in.txt", ios::in);
+	fstream out("out.txt", ios::out);
 
-	PrintTree(root);
+	if (plik.good()) {
+		plik >> liczba;	
+		for (int b = 0; b < liczba + 1; b++) {
+			plik >> skrypt;
+			plik >> number;
+			for (a = 0; a < number.length(); a++) {
+				if (number[a] == ',')
+					break;
+			}
 
-	root = Delete(root, "1", "4");
-	PrintTree(root);
-	getchar();
+			integer = number.substr(0, a);
+			if (a != number.length())
+				decimal = number.substr(a + 1, number.length());
+
+
+			if (skrypt == 'W')
+				root = Add(root,integer, decimal);
+			if (skrypt == 'U')
+				root = Delete(root, integer, decimal);
+			if (skrypt == 'S')
+				if (Search(integer, decimal, root) == true)
+					out << "TAK" << endl;
+				else
+					out << "NIE" << endl;
+			if (skrypt == 'L') {
+				out << CountIntegers(integer, root) << endl;
+			}
+		}
+	}
+	else {
+		cout << "blad odczytu" << endl;
+	}
+
 	return 0;
 }
