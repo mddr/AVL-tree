@@ -8,7 +8,7 @@ struct Node {
 	string decimal;
 	Node *left;
 	Node *right;
-	Node *up;
+
 	int height;
 	int weight;
 };
@@ -138,21 +138,21 @@ Node* NewNode(string i, string d, Node *parent) {
 	node->decimal = d;
 	node->left = NULL;
 	node->right = NULL;
+
 	node->height = 1;
 	node->weight = 0;
-	node->up = parent;
 	return(node);
 }
 
-Node* Add(Node* node, string i, string d) {
+Node* Add(Node* node, Node* parent, string i, string d) {
 	if (node == NULL)
-		return NewNode(i, d, NULL);
+		return NewNode(i, d, parent);
 	if (CompareNumbers(i, d, node->integer, node->decimal) > 0) {
-		node->right = Add(node->right, i, d);
+		node->right = Add(node->right, node, i, d);
 		node->height = 1 + node->right->height;
 	}
 	else if (CompareNumbers(i, d, node->integer, node->decimal) < 0) {
-		node->left = Add(node->left, i, d);
+		node->left = Add(node->left, node, i, d);
 		node->height = 1 + node->left->height;
 	}
 	node->weight = GetHeight(node->left) - GetHeight(node->right);
@@ -185,10 +185,12 @@ Node *MinValueNode(Node* node) {
 Node* Delete(Node* node, string i, string d) {
 	if (node == NULL)
 		return node;
-	if (CompareNumbers(i, d, node->integer, node->decimal) < 0)
+	if (CompareNumbers(i, d, node->integer, node->decimal) < 0) {
 		node->left = Delete(node->left, i, d);
-	else if (CompareNumbers(i, d, node->integer, node->decimal) > 0)
+	}
+	else if (CompareNumbers(i, d, node->integer, node->decimal) > 0) {
 		node->right = Delete(node->right, i, d);
+	}
 	else {
 		if (node->left == NULL && node->right == NULL) {
 			delete node;
@@ -196,11 +198,13 @@ Node* Delete(Node* node, string i, string d) {
 		}
 		else if (node->left == NULL) {
 			Node *tmp = node->right;
+			tmp->height--;
 			delete node->right;
 			return tmp;
 		}
 		else if (node->right == NULL) {
 			Node *tmp = node->left;
+			tmp->height--;
 			delete node->left;
 			return tmp;
 		}
@@ -211,8 +215,23 @@ Node* Delete(Node* node, string i, string d) {
 			node->right = Delete(node->right, tmp->integer, tmp->decimal);
 		}
 	}
+	if (node == NULL)
+		return node;
 
+	node->weight = GetHeight(node->left) - GetHeight(node->right);
 
+	if (node->weight == 2 && node->left->weight == -1) {
+		return RotateLeftRight(node);
+	}
+	if (node->weight == 2 && node->left->weight >= 0) {
+		return RotateRight(node);
+	}
+	if (node->weight == -2 && node->right->weight <= 0) {
+		return RotateLeft(node);
+	}
+	if (node->weight == -2 && node->right->weight == 1) {
+		return RotateRightLeft(node);
+	}
 
 	return node;
 }
@@ -230,17 +249,19 @@ void PrintTree(Node* node, int indent = 0, char c = 'k') {
 int main()
 {
 	Node *root = NULL;
-	root = Add(root, "1", "5");
-	root = Add(root, "1", "3");
-	root = Add(root, "1", "4");
-	root = Add(root, "1", "45");
-	root = Add(root, "1", "6");
-	root = Add(root, "1", "37");
-	root = Add(root, "1", "67");
-	root = Add(root, "1", "7");
+	root = Add(root,root, "1", "4");
+	root = Add(root,root, "1", "3");
+	root = Add(root,root, "1", "5");
+	root = Add(root,root, "1", "37");
+	root = Add(root,root, "1", "45");
+	root = Add(root,root, "1", "67");
+	root = Add(root,root, "1", "6");
+	root = Add(root,root, "1", "7");
 
 	PrintTree(root);
 
+	root = Delete(root, "1", "4");
+	PrintTree(root);
 	getchar();
 	return 0;
 }
