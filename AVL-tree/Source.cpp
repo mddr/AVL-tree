@@ -260,20 +260,20 @@ int main() {
 	root = Add("1", "8", root);
 	root = Add("1", "4", root);
 	root = Add("1", "9", root);
-	root = Add("1","85",root);
-	root = Add("1","851",root);	
+	root = Add("1", "85",root);
+	root = Add("1", "851",root);	
 	root = Add("1", "7", root);
-	root = Add("1", "6", root);
 	root = Add("1", "0", root);
-
-	// if (Search("2", "5", root))
-	// 	cout << "TAK" << endl;
-	// else
-	// 	cout << "NIE" << endl;
-
-	//root = Add("20", "0", root);
+	root = Add("1", "6", root);
+/*
+	 if (Search("2", "5", root))
+	 	cout << "TAK" << endl;
+	 else
+	 	cout << "NIE" << endl;
+*/
+	//root = Add("20", "55", root);
 	//root = Add("10", "0", root);
-	//root = Add("30", "0", root);
+	//root = Add("30", "5", root);
 	//root = Add("5", "0", root);
 	//root = Add("15", "0", root);
 	//root = Add("16", "0", root);
