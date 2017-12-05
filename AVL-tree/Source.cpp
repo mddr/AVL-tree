@@ -31,9 +31,6 @@ Node *RotateRight(Node*& a) {
 	b->right = a;
 	a->left = T2;
 
-	a->height = MaxOfTwo(GetHeight(a->left), GetHeight(a->right)) + 1;
-	b->height = MaxOfTwo(GetHeight(b->left), GetHeight(b->right)) + 1;
-
 	a->weight = 0;
 	b->weight = 0;
 
@@ -46,9 +43,6 @@ Node *RotateLeft(Node*& a) {
 
 	b->left = a;
 	a->right = T2;
-
-	a->height = MaxOfTwo(GetHeight(a->left), GetHeight(a->right)) + 1;
-	b->height = MaxOfTwo(GetHeight(b->left), GetHeight(b->right)) + 1;
 
 	a->weight = 0;
 	b->weight = 0;
@@ -171,6 +165,7 @@ Node* Add(Node* node, string i, string d) {
 	if (node->weight == -2 && node->right->weight == 1) {
 		return RotateRightLeft(node);
 	}
+	
 	node->height = 1 + MaxOfTwo(GetHeight(node->right), GetHeight(node->left));
 	return node;
 }
@@ -215,8 +210,6 @@ Node* Delete(Node* node, string i, string d) {
 		return node;
 
 	node->weight = GetHeight(node->left) - GetHeight(node->right);
-	//node->height = 1 + MaxOfTwo(GetHeight(node->right), GetHeight(node->left));
-
 	if (node->weight == 2 && node->left->weight == -1) {
 		return RotateLeftRight(node);
 	}
@@ -316,6 +309,9 @@ int main()
 				out << CountIntegers(integer, root) << endl;
 			}
 		}
+		PrintTree(root);
+		root = Delete(root, "1", "2");
+		PrintTree(root);
 	}
 	else {
 		cout << "blad odczytu" << endl;
